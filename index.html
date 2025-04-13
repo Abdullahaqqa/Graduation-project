@@ -4,61 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الإسعافات الأولية - دليل تفاعلي متكامل</title>
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    /* تنسيقات Tailwind مبسطة داخل الملف */
-    body { background-color: #f0fff4; color: #2d3748; font-family: sans-serif; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .text-center { text-align: center; }
-    .text-white { color: #fff; }
-    .bg-green-600 { background-color: #16a34a; }
-    .bg-green-700 { background-color: #15803d; }
-    .bg-white { background-color: #fff; }
-    .rounded-xl { border-radius: 0.75rem; }
-    .shadow-md { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-    .p-4 { padding: 1rem; }
-    .p-6 { padding: 1.5rem; }
-    .p-8 { padding: 2rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .mb-6 { margin-bottom: 1.5rem; }
-    .mt-12 { margin-top: 3rem; }
-    .mt-4 { margin-top: 1rem; }
-    .flex { display: flex; }
-    .justify-between { justify-content: space-between; }
-    .items-center { align-items: center; }
-    .gap-4 { gap: 1rem; }
-    .grid { display: grid; }
-    .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .gap-8 { gap: 2rem; }
-    .hidden { display: none; }
-    .cursor-pointer { cursor: pointer; }
-    .transition-transform { transition: transform 0.3s; }
-    .hover\:text-yellow-300:hover { color: #facc15; }
-    .hover\:bg-green-700:hover { background-color: #15803d; }
-    .hover\:bg-green-500:hover { background-color: #22c55e; }
-    .text-2xl { font-size: 1.5rem; }
-    .text-xl { font-size: 1.25rem; }
-    .text-4xl { font-size: 2.25rem; }
-    .font-bold { font-weight: bold; }
-    .font-semibold { font-weight: 600; }
-    .space-y-4 > * + * { margin-top: 1rem; }
-    .space-y-12 > * + * { margin-top: 3rem; }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animated { animation: fadeIn 0.5s ease-out; }
     .emergency-card:hover { transform: scale(1.02); }
-    /* أزرار الحالة */
-    button { border: none; outline: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
-<body>
+<body class="bg-green-50 text-gray-800">
   <!-- شريط التنقل -->
   <nav class="bg-green-600 p-4 text-white shadow-lg">
-    <div class="container flex justify-between items-center">
+    <div class="container mx-auto flex justify-between items-center">
       <h1 class="text-2xl font-bold">🚑 دليل الإسعافات الأولية</h1>
       <div class="flex gap-4">
         <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
@@ -69,52 +28,60 @@
   </nav>
 
   <!-- المحتوى الرئيسي -->
-  <main class="container" style="padding: 2rem;">
+  <main class="container mx-auto px-6 py-10 space-y-12">
     <!-- بطاقات الحالات الطارئة -->
     <div class="grid md:grid-cols-3 gap-8">
       <!-- قالب البطاقة -->
       <template id="card-template">
         <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer">
           <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
-          <p>اضغط لعرض طريقة التعامل</p>
+          <p class="text-gray-600">اضغط لعرض طريقة التعامل</p>
         </div>
       </template>
     </div>
 
     <!-- خطوات الإسعافات -->
-    <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer" style="margin-top: 2rem;">
+    <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold" id="caseTitle"></h2>
-        <button onclick="closeSteps()" style="background: none; color: #16a34a; font-size: 1.25rem;">✕</button>
+        <h2 class="text-2xl font-bold text-gray-800" id="caseTitle"></h2>
+        <button onclick="closeSteps()" class="text-green-600 hover:text-green-800 text-xl">✕</button>
       </div>
       <div id="stepsWrapper"></div>
-      <div class="flex justify-between" style="margin-top: 2rem;">
-        <button id="resetBtn" onclick="resetSteps()" style="background-color: #16a34a; color: #fff;">🔄 إعادة</button>
-        <button id="nextBtn" onclick="nextStep()" style="background-color: #16a34a; color: #fff;">التالي →</button>
+      <div class="flex justify-between mt-8">
+        <button id="resetBtn" onclick="resetSteps()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50">
+          🔄 إعادة
+        </button>
+        <button id="nextBtn" onclick="nextStep()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+          التالي →
+        </button>
       </div>
-      <p id="finishedMsg" class="text-center" style="color: #16a34a; font-weight: bold; margin-top: 1.5rem; display: none; font-size: 1.25rem;">
+      <p id="finishedMsg" class="text-center text-green-700 font-bold mt-6 hidden text-xl">
         🎉 انتهت خطوات الإسعافات الأولية!
       </p>
     </div>
 
     <!-- خريطة المستشفيات -->
-    <div class="bg-white rounded-xl p-8 shadow-md" id="hospitalMap" style="margin-top: 3rem;">
+    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
       <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
-      <div id="map" style="height: 16rem; border-radius: 0.5rem;"></div>
+      <div id="map" class="h-64 rounded-lg"></div>
     </div>
   </main>
 
   <!-- تذييل الصفحة -->
-  <footer class="bg-green-700 text-white" style="padding: 1.5rem; margin-top: 3rem;">
-    <div class="container text-center">
+  <footer class="bg-green-700 text-white py-6 mt-12">
+    <div class="container mx-auto text-center">
       <p>تم التطوير بواسطة مصطفى محمد نضال و عبدالله سليمان خلف | مشروع تخرج 2025</p>
-      <button onclick="toggleDarkMode()" style="background-color: #16a34a; margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
+      <button onclick="toggleDarkMode()"
+              class="mt-4 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500">
         🌙 الوضع الليلي
       </button>
     </div>
   </footer>
 
-  <!-- تضمين كود جافا سكريبت داخل ملف HTML -->
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
   <script>
     // بيانات الحالات وخطواتها
     const cases = {
@@ -181,8 +148,8 @@
       currentStep = 0;
       renderSteps();
       document.getElementById('stepsContainer').classList.remove('hidden');
-      // التمرير التلقائي للقسم
-      document.getElementById('stepsContainer').scrollIntoView({ behavior: "smooth" });
+      // التمرير التلقائي للمكان الذي يحتوي على الخطوات
+      document.getElementById('stepsContainer').scrollIntoView({behavior: "smooth"});
     }
 
     function renderSteps() {
@@ -192,15 +159,15 @@
         const div = document.createElement('div');
         div.className = (i === currentStep ? "" : "hidden ") + "space-y-4";
         div.innerHTML = `
-          <div style="display: flex; gap: 1rem; align-items: flex-start;">
-            <span style="font-size: 2.25rem;">${s.emoji}</span>
-            <p style="font-size: 1.125rem;">${s.text}</p>
+          <div class="flex items-start gap-4">
+            <span class="text-4xl">${s.emoji}</span>
+            <p class="text-lg">${s.text}</p>
           </div>`;
         wrapper.appendChild(div);
       });
       document.getElementById('resetBtn').disabled = (currentStep === 0);
       document.getElementById('nextBtn').disabled = false;
-      document.getElementById('finishedMsg').style.display = "none";
+      document.getElementById('finishedMsg').classList.add('hidden');
     }
 
     function nextStep() {
@@ -208,8 +175,9 @@
         currentStep++;
         renderSteps();
       } else {
-        document.getElementById('finishedMsg').style.display = "block";
+        document.getElementById('finishedMsg').classList.remove('hidden');
         document.getElementById('nextBtn').disabled = true;
+        document.getElementById('resetBtn').disabled = false;
       }
     }
 
@@ -221,7 +189,7 @@
     function closeSteps() {
       currentStep = 0;
       document.getElementById('nextBtn').disabled = false;
-      document.getElementById('finishedMsg').style.display = "none";
+      document.getElementById('finishedMsg').classList.add('hidden');
       renderSteps();
       document.getElementById('stepsContainer').classList.add('hidden');
     }
@@ -238,17 +206,10 @@
     // الوضع الليلي
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
-      if(document.body.classList.contains('dark')){
-        document.body.style.backgroundColor = '#1a202c';
-        document.body.style.color = '#fff';
-      } else {
-        document.body.style.backgroundColor = '#f0fff4';
-        document.body.style.color = '#2d3748';
-      }
+      document.body.style.backgroundColor = document.body.classList.contains('dark')
+        ? '#1a202c'
+        : '#ecfdf5';
     }
   </script>
-
-  <!-- تضمين API لخريطة جوجل داخل الملف نفسه -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
 </body>
 </html>
