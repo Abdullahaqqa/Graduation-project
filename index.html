@@ -22,16 +22,16 @@
       <div class="flex gap-4">
         <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
         <a href="tel:937" class="hover:text-yellow-300">📞 وزارة الصحة (937)</a>
-        <a href="#hospitalMap" class="hover:text-yellow-300">🗺 خريطة المستشفيات</a>
+        <a href="#hospitalMap" class="hover:text-yellow-300">🗺️ خريطة المستشفيات</a>
       </div>
     </div>
   </nav>
 
-  <!-- المحتوى الرئيسي -->
+  <!-- محتوى رئيسي -->
   <main class="container mx-auto px-6 py-10 space-y-12">
     <!-- بطاقات الحالات الطارئة -->
     <div class="grid md:grid-cols-3 gap-8">
-      <!-- قالب البطاقة -->
+      <!-- قائمة الحالات -->
       <template id="card-template">
         <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer">
           <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
@@ -92,7 +92,7 @@
       ],
       "الغرق": [
         { emoji: "🚿", text: "أخرج الشخص من الماء وابدأ بالتنفس الاصطناعي إذا لزم." },
-        { emoji: "🛏", text: "ضعه على جانبه لتجنب الاختناق بالقيء." },
+        { emoji: "🛏️", text: "ضعه على جانبه لتجنب الاختناق بالقيء." },
         { emoji: "📞", text: "اتصل بالطوارئ فورًا." }
       ],
       "الصعق الكهربائي": [
@@ -102,8 +102,8 @@
       ],
       "الإغماء": [
         { emoji: "✅", text: "تأكد من أن المكان آمن." },
-        { emoji: "🛏", text: "ارفع الساقين لتحسين الدورة الدموية." },
-        { emoji: "🗣", text: "تحدث مع المصاب وتحقق من وعيه." }
+        { emoji: "🛏️", text: "ارفع الساقين لتحسين الدورة الدموية." },
+        { emoji: "🗣️", text: "تحدث مع المصاب وتحقق من وعيه." }
       ],
       "انخفاض أو ارتفاع السكر": [
         { emoji: "🍬", text: "إذا كان منخفضًا، أعطه سكرًا سريع المفعول." },
@@ -112,7 +112,7 @@
       ],
       "الاختناق": [
         { emoji: "🤚", text: "اضغط بقبضة اليد على بطن المصاب (هيمليك)." },
-        { emoji: "🗣", text: "تحقق من خروج الجسم الغريب." },
+        { emoji: "🗣️", text: "تحقق من خروج الجسم الغريب." },
         { emoji: "🚑", text: "استدعِ الإسعاف فورًا." }
       ],
       "الكسور والجروح": [
@@ -121,7 +121,7 @@
         { emoji: "🚑", text: "استدعِ الإسعاف لنقل المصاب." }
       ],
       "ضربة الشمس": [
-        { emoji: "☂", text: "انقل المصاب لمكان بارد ومظلل." },
+        { emoji: "☂️", text: "انقل المصاب لمكان بارد ومظلل." },
         { emoji: "💧", text: "أعطه ماءً ببطء." },
         { emoji: "🚑", text: "اتصل بالطوارئ إذا ظهرت أعراض خطيرة." }
       ]
@@ -148,8 +148,11 @@
       currentStep = 0;
       renderSteps();
       document.getElementById('stepsContainer').classList.remove('hidden');
-      // التمرير التلقائي للمكان الذي يحتوي على الخطوات
-      document.getElementById('stepsContainer').scrollIntoView({behavior: "smooth"});
+
+      // ✅ تمرير تلقائي إلى الشرح
+      setTimeout(() => {
+        document.getElementById('stepsContainer').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
 
     function renderSteps() {
@@ -157,7 +160,7 @@
       wrapper.innerHTML = "";
       currentSteps.forEach((s, i) => {
         const div = document.createElement('div');
-        div.className = (i === currentStep ? "" : "hidden ") + "space-y-4";
+        div.className = `step ${i===currentStep? '' : 'hidden'} space-y-4`;
         div.innerHTML = `
           <div class="flex items-start gap-4">
             <span class="text-4xl">${s.emoji}</span>
@@ -207,8 +210,7 @@
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
       document.body.style.backgroundColor = document.body.classList.contains('dark')
-        ? '#1a202c'
-        : '#ecfdf5';
+        ? '#1a202c' : '#ecfdf5';
     }
   </script>
 </body>
