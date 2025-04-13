@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإسعافات الأولية - دليل تفاعلي متكامل</title>
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animated { animation: fadeIn 0.5s ease-out; }
+    .emergency-card:hover { transform: scale(1.02); }
+  </style>
+</head>
+<body class="bg-green-50 text-gray-800">
+  <!-- شريط التنقل -->
+  <nav class="bg-green-600 p-4 text-white shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">🚑 دليل الإسعافات الأولية</h1>
+      <div class="flex gap-4">
+        <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
+        <a href="tel:937" class="hover:text-yellow-300">📞 وزارة الصحة (937)</a>
+        <a href="#hospitalMap" class="hover:text-yellow-300">🗺️ خريطة المستشفيات</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- محتوى رئيسي -->
+  <main class="container mx-auto px-6 py-10 space-y-12">
+    <!-- بطاقات الحالات الطارئة -->
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- قائمة الحالات -->
+      <template id="card-template">
+        <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer">
+          <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
+          <p class="text-gray-600">اضغط لعرض طريقة التعامل</p>
+        </div>
+      </template>
+    </div>
+
+    <!-- خطوات الإسعافات -->
+    <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800" id="caseTitle"></h2>
+        <button onclick="closeSteps()" class="text-green-600 hover:text-green-800 text-xl">✕</button>
+      </div>
+      <div id="stepsWrapper"></div>
+      <div class="flex justify-between mt-8">
+        <button id="resetBtn" onclick="resetSteps()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50">
+          🔄 إعادة
+        </button>
+        <button id="nextBtn" onclick="nextStep()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+          التالي →
+        </button>
+      </div>
+      <p id="finishedMsg" class="text-center text-green-700 font-bold mt-6 hidden text-xl">
+        🎉 انتهت خطوات الإسعافات الأولية!
+      </p>
+    </div>
+
+    <!-- خريطة المستشفيات -->
+    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
+      <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
+      <div id="map" class="h-64 rounded-lg"></div>
+    </div>
+  </main>
+
+  <!-- تذييل الصفحة -->
+  <footer class="bg-green-700 text-white py-6 mt-12">
+    <div class="container mx-auto text-center">
+      <p>تم التطوير بواسطة مصطفى محمد نضال و عبدالله سليمان خلف | مشروع تخرج 2025</p>
+      <button onclick="toggleDarkMode()"
+              class="mt-4 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500">
+        🌙 الوضع الليلي
+      </button>
+    </div>
+  </footer>
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+  <script>
+    // بيانات الحالات وخطواتها
+    const cases = {
+      "الحروق": [
+        { emoji: "💧", text: "برد الحرق فورًا بالماء البارد لمدة 10 دقائق." },
+        { emoji: "🩹", text: "غطِّ المنطقة بضمادة نظيفة وغير لاصقة." },
+        { emoji: "🚑", text: "استدعِ الإسعاف إذا كانت الحروق شديدة." }
+      ],
+      "الغرق": [
+        { emoji: "🚿", text: "أخرج الشخص من الماء وابدأ بالتنفس الاصطناعي إذا لزم." },
+        { emoji: "🛏️", text: "ضعه على جانبه لتجنب الاختناق بالقيء." },
+        { emoji: "📞", text: "اتصل بالطوارئ فورًا." }
+      ],
+      "الصعق الكهربائي": [
+        { emoji: "🔌", text: "افصل مصدر الكهرباء قبل الاقتراب." },
+        { emoji: "🩹", text: "فحص المصاب وتغطية أي حروق بضمادة." },
+        { emoji: "🚑", text: "استدعِ الإسعاف وتابع العلامات الحيوية." }
+      ],
+      "الإغماء": [
+        { emoji: "✅", text: "تأكد من أن المكان آمن." },
+        { emoji: "🛏️", text: "ارفع الساقين لتحسين الدورة الدموية." },
+        { emoji: "🗣️", text: "تحدث مع المصاب وتحقق من وعيه." }
+      ],
+      "انخفاض أو ارتفاع السكر": [
+        { emoji: "🍬", text: "إذا كان منخفضًا، أعطه سكرًا سريع المفعول." },
+        { emoji: "💧", text: "إذا كان مرتفعًا، وفر له الماء." },
+        { emoji: "📞", text: "اتصل بالطبيب أو الإسعاف إذا استمر الوضع." }
+      ],
+      "الاختناق": [
+        { emoji: "🤚", text: "اضغط بقبضة اليد على بطن المصاب (هيمليك)." },
+        { emoji: "🗣️", text: "تحقق من خروج الجسم الغريب." },
+        { emoji: "🚑", text: "استدعِ الإسعاف فورًا." }
+      ],
+      "الكسور والجروح": [
+        { emoji: "🩹", text: "نظف الجرح وغطِّه بضمادة معقمة." },
+        { emoji: "🔗", text: "ثبّت الكسر بجبيرة أو أي شيء صلب." },
+        { emoji: "🚑", text: "استدعِ الإسعاف لنقل المصاب." }
+      ],
+      "ضربة الشمس": [
+        { emoji: "☂️", text: "انقل المصاب لمكان بارد ومظلل." },
+        { emoji: "💧", text: "أعطه ماءً ببطء." },
+        { emoji: "🚑", text: "اتصل بالطوارئ إذا ظهرت أعراض خطيرة." }
+      ]
+    };
+
+    // إنشاء البطاقات ديناميكيًا
+    const grid = document.querySelector('.grid');
+    const template = document.getElementById('card-template');
+    Object.keys(cases).forEach(name => {
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.case-title').textContent = name;
+      const card = clone.querySelector('.emergency-card');
+      card.addEventListener('click', () => showCase(name));
+      grid.appendChild(clone);
+    });
+
+    // عرض الخطوات
+    let currentStep = 0;
+    let currentSteps = [];
+
+    function showCase(name) {
+      document.getElementById('caseTitle').textContent = name;
+      currentSteps = cases[name];
+      currentStep = 0;
+      renderSteps();
+      document.getElementById('stepsContainer').classList.remove('hidden');
+
+      // ✅ تمرير تلقائي إلى الشرح
+      setTimeout(() => {
+        document.getElementById('stepsContainer').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+
+    function renderSteps() {
+      const wrapper = document.getElementById('stepsWrapper');
+      wrapper.innerHTML = "";
+      currentSteps.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = `step ${i===currentStep? '' : 'hidden'} space-y-4`;
+        div.innerHTML = `
+          <div class="flex items-start gap-4">
+            <span class="text-4xl">${s.emoji}</span>
+            <p class="text-lg">${s.text}</p>
+          </div>`;
+        wrapper.appendChild(div);
+      });
+      document.getElementById('resetBtn').disabled = (currentStep === 0);
+      document.getElementById('nextBtn').disabled = false;
+      document.getElementById('finishedMsg').classList.add('hidden');
+    }
+
+    function nextStep() {
+      if (currentStep < currentSteps.length - 1) {
+        currentStep++;
+        renderSteps();
+      } else {
+        document.getElementById('finishedMsg').classList.remove('hidden');
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('resetBtn').disabled = false;
+      }
+    }
+
+    function resetSteps() {
+      currentStep = 0;
+      renderSteps();
+    }
+
+    function closeSteps() {
+      currentStep = 0;
+      document.getElementById('nextBtn').disabled = false;
+      document.getElementById('finishedMsg').classList.add('hidden');
+      renderSteps();
+      document.getElementById('stepsContainer').classList.add('hidden');
+    }
+
+    // خريطة جوجل
+    function initMap() {
+      const center = { lat: 24.7136, lng: 46.6753 };
+      new google.maps.Map(document.getElementById("map"), {
+        zoom: 12,
+        center: center,
+      });
+    }
+
+    // الوضع الليلي
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      document.body.style.backgroundColor = document.body.classList.contains('dark')
+        ? '#1a202c' : '#ecfdf5';
+    }
+  </script>
+</body>
+</html>
