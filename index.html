@@ -27,11 +27,11 @@
     </div>
   </nav>
 
-  <!-- محتوى رئيسي -->
+  <!-- المحتوى الرئيسي -->
   <main class="container mx-auto px-6 py-10 space-y-12">
     <!-- بطاقات الحالات الطارئة -->
     <div class="grid md:grid-cols-3 gap-8">
-      <!-- قائمة الحالات -->
+      <!-- قالب البطاقة -->
       <template id="card-template">
         <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer">
           <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
@@ -40,16 +40,8 @@
       </template>
     </div>
 
-    <!-- خريطة المستشفيات -->
-    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
-      <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
-      <div id="map" class="h-64 rounded-lg"></div>
-    </div>
-  </main>
-
-  <!-- نافذة خطوات الإسعافات (modal) -->
-  <div class="fixed inset-0 flex items-center justify-center p-4 animated hidden z-50" id="stepsContainer">
-    <div class="bg-white rounded-xl p-8 shadow-md relative max-w-lg w-full">
+    <!-- خطوات الإسعافات -->
+    <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800" id="caseTitle"></h2>
         <button onclick="closeSteps()" class="text-green-600 hover:text-green-800 text-xl">✕</button>
@@ -69,7 +61,13 @@
         🎉 انتهت خطوات الإسعافات الأولية!
       </p>
     </div>
-  </div>
+
+    <!-- خريطة المستشفيات -->
+    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
+      <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
+      <div id="map" class="h-64 rounded-lg"></div>
+    </div>
+  </main>
 
   <!-- تذييل الصفحة -->
   <footer class="bg-green-700 text-white py-6 mt-12">
@@ -149,8 +147,9 @@
       currentSteps = cases[name];
       currentStep = 0;
       renderSteps();
-      // إزالة الفئة "hidden" لتظهر النافذة مباشرة
       document.getElementById('stepsContainer').classList.remove('hidden');
+      // التمرير التلقائي للمكان الذي يحتوي على الخطوات
+      document.getElementById('stepsContainer').scrollIntoView({behavior: "smooth"});
     }
 
     function renderSteps() {
@@ -158,8 +157,7 @@
       wrapper.innerHTML = "";
       currentSteps.forEach((s, i) => {
         const div = document.createElement('div');
-        // اظهار الخطوة الحالية فقط
-        div.className = ${i === currentStep ? '' : 'hidden'} space-y-4;
+        div.className = (i === currentStep ? "" : "hidden ") + "space-y-4";
         div.innerHTML = `
           <div class="flex items-start gap-4">
             <span class="text-4xl">${s.emoji}</span>
@@ -209,7 +207,8 @@
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
       document.body.style.backgroundColor = document.body.classList.contains('dark')
-        ? '#1a202c' : '#ecfdf5';
+        ? '#1a202c'
+        : '#ecfdf5';
     }
   </script>
 </body>
