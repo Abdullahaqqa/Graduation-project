@@ -90,7 +90,6 @@
       <div class="flex gap-4">
         <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
         <a href="tel:937" class="hover:text-yellow-300">📞 وزارة الصحة (937)</a>
-        <a href="#hospitalMap" class="hover:text-yellow-300">🗺 خريطة المستشفيات</a>
       </div>
     </div>
   </nav>
@@ -131,11 +130,44 @@
       </p>
     </div>
 
-    <!-- خريطة المستشفيات -->
-    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
-      <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
-      <div id="map" class="h-64 rounded-lg bg-gray-200 flex items-center justify-center">
-        <p class="text-gray-500">خريطة المستشفيات (تتطلب مفتاح API)</p>
+    <!-- قسم معلومات إضافية بدلاً من الخريطة -->
+    <div class="mt-12 bg-white rounded-xl p-8 shadow-md">
+      <h2 class="text-2xl font-bold mb-4">📞 معلومات هامة</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-green-50 p-6 rounded-lg">
+          <h3 class="text-xl font-bold text-green-700 mb-3">📞 أرقام الطوارئ</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center">1</span>
+              الطوارئ العامة: <strong>997</strong>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center">2</span>
+              وزارة الصحة: <strong>937</strong>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center">3</span>
+              الدفاع المدني: <strong>998</strong>
+            </li>
+          </ul>
+        </div>
+        <div class="bg-green-50 p-6 rounded-lg">
+          <h3 class="text-xl font-bold text-green-700 mb-3">💡 نصائح هامة</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">✓</span>
+              احتفظ بحقيبة إسعافات أولية في منزلك وسيارتك
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">✓</span>
+              تعلم أساسيات الإنعاش القلبي الرئوي (CPR)
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">✓</span>
+              راجع محتويات حقيبة الإسعافات بانتظام
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </main>
@@ -345,43 +377,202 @@
       
       title.textContent = `نصائح للوقاية من ${name}`;
       list.innerHTML = "";
+    
+      
+      
+    
+
+    
+      
+      
+    
+
       
       preventionTips[name].forEach(tip => {
+    
+      
+      
+    
+
+    
+      
+      
+    
+
         const li = document.createElement('li');
+    
+      
+      
+    
+
+    
+      
+      
+    
+
         li.textContent = tip;
+    
+      
+      
+    
+
+    
+      
+      
+    
+
         li.className = 'flex items-start';
+    
+      
+      
+    
+
+    
+      
+      
+    
+
         li.innerHTML = `<span class="mr-2 text-green-600">✓</span> ${tip}`;
+    
+      
+      
+    
+
         list.appendChild(li);
+    
+      
+      
+    
+
       });
+    
+      
+      
+    
+
       
       modal.style.display = 'flex';
+    
+      
+      
+    
+
     }
 
     // إغلاق نافذة الوقاية
+    
+      
+      
+    
+
     function closePrevention() {
+    
+      
+      
+    
+
       document.getElementById('preventionModal').style.display = 'none';
+    
+      
+      
+    
+
     }
 
     // إغلاق النافذة بالنقر خارج المحتوى
+    
+      
+      
+    
+
     window.onclick = function(event) {
+    
+      
+      
+    
+
       const modal = document.getElementById('preventionModal');
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
       if (event.target === modal) {
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
         closePrevention();
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
       }
     }
 
-    // خريطة جوجل
-    function initMap() {
-      // تم إزالة API key لأسباب أمنية
-      // يمكنك إضافة مفتاح API الخاص بك هنا
-      const center = { lat: 24.7136, lng: 46.6753 };
-      new google.maps.Map(document.getElementById("map"), {
-        zoom: 12,
-        center: center,
-      });
-    }
-
     // الوضع الليلي
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
+    
+      
+      
+    
+
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
       document.body.style.backgroundColor = document.body.classList.contains('dark')
