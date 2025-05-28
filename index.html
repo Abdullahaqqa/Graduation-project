@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الإسعافات الأولية - دليل تفاعلي متكامل</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -13,381 +12,257 @@
     }
     .animated { animation: fadeIn 0.5s ease-out; }
     .emergency-card:hover { transform: scale(1.02); }
-    .prevention-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .prevention-content {
-      background: white;
-      width: 90%;
-      max-width: 600px;
-      border-radius: 15px;
-      padding: 25px;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      animation: fadeIn 0.3s ease-out;
-    }
-    .prevention-close {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      font-size: 24px;
-      cursor: pointer;
-      color: #777;
-      transition: all 0.3s;
-    }
-    .prevention-close:hover {
-      color: #e53e3e;
-      transform: scale(1.1);
-    }
-    .prevention-title {
-      color: #2f855a;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      text-align: center;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #e2e8f0;
-    }
-    .prevention-list li {
-      margin-bottom: 12px;
-      padding-right: 10px;
-      font-size: 1.1rem;
-      line-height: 1.6;
-    }
-    .prevention-icon {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 30px;
-      height: 30px;
-      background: #f6e05e;
-      color: #975a16;
-      border-radius: 50%;
-      font-weight: bold;
-      margin-left: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .prevention-icon:hover {
-      transform: scale(1.1);
-      background: #ecc94b;
-    }
   </style>
 </head>
 <body class="bg-green-50 text-gray-800">
-  <!-- شريط التنقل -->
-  <nav class="bg-green-600 p-4 text-white shadow-lg">
-    <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold">🚑 دليل الإسعافات الأولية</h1>
-      <div class="flex gap-4">
-        <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
-        <a href="tel:937" class="hover:text-yellow-300">📞 وزارة الصحة (937)</a>
-        <a href="#hospitalMap" class="hover:text-yellow-300">🗺 خريطة المستشفيات</a>
-      </div>
-    </div>
-  </nav>
 
-  <!-- المحتوى الرئيسي -->
-  <main class="container mx-auto px-6 py-10 space-y-12">
-    <!-- بطاقات الحالات الطارئة -->
-    <div class="grid md:grid-cols-3 gap-8">
-      <!-- قالب البطاقة -->
-      <template id="card-template">
-        <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer relative">
-          <span class="prevention-icon absolute top-3 left-3" onclick="showPrevention('{name}')">!</span>
-          <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
-          <p class="text-gray-600">اضغط لعرض طريقة التعامل</p>
-        </div>
-      </template>
-    </div>
+<!-- نافذة الوقاية -->
+<div id="preventionBox" class="fixed top-1/3 right-1/3 bg-white shadow-lg rounded-xl p-6 w-80 hidden z-50 border-2 border-green-600">
+  <p id="preventionText" class="text-gray-800 text-lg whitespace-pre-line"></p>
+  <button onclick="document.getElementById('preventionBox').classList.add('hidden')"
+          class="mt-4 text-green-600 hover:text-green-800">✕ إغلاق</button>
+</div>
 
-    <!-- خطوات الإسعافات -->
-    <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800" id="caseTitle"></h2>
-        <button onclick="closeSteps()" class="text-green-600 hover:text-green-800 text-xl">✕</button>
-      </div>
-      <div id="stepsWrapper"></div>
-      <div class="flex justify-between mt-8">
-        <button id="resetBtn" onclick="resetSteps()"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50">
-          🔄 إعادة
-        </button>
-        <button id="nextBtn" onclick="nextStep()"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-          التالي →
-        </button>
-      </div>
-      <p id="finishedMsg" class="text-center text-green-700 font-bold mt-6 hidden text-xl">
-        🎉 انتهت خطوات الإسعافات الأولية!
-      </p>
-    </div>
-
-    <!-- خريطة المستشفيات -->
-    <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
-      <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
-      <div id="map" class="h-64 rounded-lg bg-gray-200 flex items-center justify-center">
-        <p class="text-gray-500">خريطة المستشفيات (تتطلب مفتاح API)</p>
-      </div>
-    </div>
-  </main>
-
-  <!-- نافذة نصائح الوقاية -->
-  <div class="prevention-modal" id="preventionModal">
-    <div class="prevention-content">
-      <span class="prevention-close" onclick="closePrevention()">✕</span>
-      <h3 class="prevention-title" id="preventionTitle"></h3>
-      <ul class="prevention-list" id="preventionList"></ul>
+<!-- شريط التنقل -->
+<nav class="bg-green-600 p-4 text-white shadow-lg">
+  <div class="container mx-auto flex justify-between items-center">
+    <h1 class="text-2xl font-bold">🚑 دليل الإسعافات الأولية</h1>
+    <div class="flex gap-4">
+      <a href="tel:997" class="hover:text-yellow-300">📞 الطوارئ (997)</a>
+      <a href="tel:937" class="hover:text-yellow-300">📞 وزارة الصحة (937)</a>
+      <a href="#hospitalMap" class="hover:text-yellow-300">🗺 خريطة المستشفيات</a>
     </div>
   </div>
+</nav>
 
-  <!-- تذييل الصفحة -->
-  <footer class="bg-green-700 text-white py-6 mt-12">
-    <div class="container mx-auto text-center">
-      <p>تم التطوير بواسطة مصطفى محمد نضال و عبدالله سليمان خلف | مشروع تخرج 2025</p>
-      <button onclick="toggleDarkMode()"
-              class="mt-4 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500">
-        🌙 الوضع الليلي
-      </button>
+<!-- المحتوى الرئيسي -->
+<main class="container mx-auto px-6 py-10 space-y-12">
+  <!-- بطاقات الحالات الطارئة -->
+  <div class="grid md:grid-cols-3 gap-8">
+    <template id="card-template">
+      <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer relative">
+        <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
+        <p class="text-gray-600">اضغط لعرض طريقة التعامل</p>
+        <button class="text-red-600 hover:text-red-800 mt-4" onclick="">❗ كيف أتفادى ذلك؟</button>
+      </div>
+    </template>
+  </div>
+
+  <!-- خطوات الإسعافات -->
+  <div class="bg-white rounded-xl p-8 shadow-md animated hidden" id="stepsContainer">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800" id="caseTitle"></h2>
+      <button onclick="closeSteps()" class="text-green-600 hover:text-green-800 text-xl">✕</button>
     </div>
-  </footer>
+    <div id="stepsWrapper"></div>
+    <div class="flex justify-between mt-8">
+      <button id="resetBtn" onclick="resetSteps()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50">🔄 إعادة</button>
+      <button id="nextBtn" onclick="nextStep()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">التالي →</button>
+    </div>
+    <p id="finishedMsg" class="text-center text-green-700 font-bold mt-6 hidden text-xl">🎉 انتهت خطوات الإسعافات الأولية!</p>
+  </div>
 
-  <script>
-    // بيانات الحالات وخطواتها
-    const cases = {
-      "الحروق": [
-        { emoji: "💧", text: "برد الحرق فورًا بالماء البارد لمدة 10 دقائق." },
-        { emoji: "🩹", text: "غطِّ المنطقة بضمادة نظيفة وغير لاصقة." },
-        { emoji: "🚑", text: "استدعِ الإسعاف إذا كانت الحروق شديدة." }
-      ],
-      "الغرق": [
-        { emoji: "🚿", text: "أخرج الشخص من الماء وابدأ بالتنفس الاصطناعي إذا لزم." },
-        { emoji: "🛏", text: "ضعه على جانبه لتجنب الاختناق بالقيء." },
-        { emoji: "📞", text: "اتصل بالطوارئ فورًا." }
-      ],
-      "الصعق الكهربائي": [
-        { emoji: "🔌", text: "افصل مصدر الكهرباء قبل الاقتراب." },
-        { emoji: "🩹", text: "فحص المصاب وتغطية أي حروق بضمادة." },
-        { emoji: "🚑", text: "استدعِ الإسعاف وتابع العلامات الحيوية." }
-      ],
-      "الإغماء": [
-        { emoji: "✅", text: "تأكد من أن المكان آمن." },
-        { emoji: "🛏", text: "ارفع الساقين لتحسين الدورة الدموية." },
-        { emoji: "🗣", text: "تحدث مع المصاب وتحقق من وعيه." }
-      ],
-      "انخفاض أو ارتفاع السكر": [
-        { emoji: "🍬", text: "إذا كان منخفضًا، أعطه سكرًا سريع المفعول." },
-        { emoji: "💧", text: "إذا كان مرتفعًا، وفر له الماء." },
-        { emoji: "📞", text: "اتصل بالطبيب أو الإسعاف إذا استمر الوضع." }
-      ],
-      "الاختناق": [
-        { emoji: "🤚", text: "اضغط بقبضة اليد على بطن المصاب (هيمليك)." },
-        { emoji: "🗣", text: "تحقق من خروج الجسم الغريب." },
-        { emoji: "🚑", text: "استدعِ الإسعاف فورًا." }
-      ],
-      "الكسور والجروح": [
-        { emoji: "🩹", text: "نظف الجرح وغطِّه بضمادة معقمة." },
-        { emoji: "🔗", text: "ثبّت الكسر بجبيرة أو أي شيء صلب." },
-        { emoji: "🚑", text: "استدعِ الإسعاف لنقل المصاب." }
-      ],
-      "ضربة الشمس": [
-        { emoji: "☂", text: "انقل المصاب لمكان بارد ومظلل." },
-        { emoji: "💧", text: "أعطه ماءً ببطء." },
-        { emoji: "🚑", text: "اتصل بالطوارئ إذا ظهرت أعراض خطيرة." }
-      ]
-    };
+  <!-- خريطة المستشفيات -->
+  <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
+    <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
+    <div id="map" class="h-64 rounded-lg"></div>
+  </div>
+</main>
 
-    // نصائح الوقاية لكل حالة
-    const preventionTips = {
-      "الحروق": [
-        "استخدم القفازات عند التعامل مع الأواني الساخنة",
-        "أبعد الأطفال عن المطبخ أثناء الطهي",
-        "افحص درجة حرارة الماء قبل الاستحمام",
-        "ضع واقي شمس عند التعرض للشمس المباشرة",
-        "لا تترك الشموع مشتعلة دون مراقبة"
-      ],
-      "الغرق": [
-        "لا تسبح وحيدًا وخاصة في المساء",
-        "ارتد سترة النجاة عند ركوب القوارب",
-        "علم الأطفال السباحة في سن مبكرة",
-        "ضع سياجًا حول حمامات السباحة في المنازل",
-        "تجنب السباحة بعد الأكل مباشرة"
-      ],
-      "الصعق الكهربائي": [
-        "افصل الأجهزة الكهربائية عند تنظيفها",
-        "لا تلمس الأجهزة الكهربائية بيد مبللة",
-        "استخدم أغطية لمآخذ الكهرباء لحماية الأطفال",
-        "أصلح الأسلاك المتآكلة أو المكشوفة فورًا",
-        "استشر كهربائيًا عند الشك في أي خلل"
-      ],
-      "الإغماء": [
-        "تجنب الوقوف المفاجئ بعد الجلوس الطويل",
-        "اشرب كمية كافية من الماء يوميًا",
-        "تناول وجبات متوازنة بانتظام",
-        "استرح في مكان بارد عند الشعور بالإرهاق",
-        "استشر طبيبًا إذا تكرر الإغماء"
-      ],
-      "انخفاض أو ارتفاع السكر": [
-        "افحص مستوى السكر بانتظام إذا كنت مريض سكر",
-        "احمل معك قطعة سكر أو عصير في جيبك",
-        "تناول وجبات صغيرة متعددة خلال اليوم",
-        "احرص على تناول الأدوية في مواعيدها",
-        "مارس الرياضة بانتظام"
-      ],
-      "الاختناق": [
-        "قطع الطعام لقطع صغيرة خاصة للأطفال",
-        "تجنب الأكل أثناء المشي أو الركض",
-        "لا تضع أشياء صغيرة في متناول الأطفال",
-        "تعلم طريقة هيمليك للإسعافات الأولية",
-        "تحدث مع الأطفال عن مضغ الطعام جيدًا"
-      ],
-      "الكسور والجروح": [
-        "ارتدِ أحذية مناسبة عند ممارسة الرياضة",
-        "استخدم معدات الحماية في أماكن العمل",
-        "أبعد الأدوات الحادة عن متناول الأطفال",
-        "استخدم سلمًا ثابتًا عند الوصول لأماكن مرتفعة",
-        "نظف الأرضيات من السوائل المنسكبة فورًا"
-      ],
-      "ضربة الشمس": [
-        "اشرب الماء بانتظام في الطقس الحار",
-        "ارتدي ملابس قطنية فاتحة اللون",
-        "استخدم واقي شمس وقبعة عند الخروج",
-        "تجنب الخروج في أوقات الذروة (10 ص - 4 م)",
-        "خذ فترات راحة في أماكن مظللة"
-      ]
-    };
+<!-- تذييل الصفحة -->
+<footer class="bg-green-700 text-white py-6 mt-12">
+  <div class="container mx-auto text-center">
+    <p>تم التطوير بواسطة مصطفى محمد نضال و عبدالله سليمان خلف | مشروع تخرج 2025</p>
+    <button onclick="toggleDarkMode()" class="mt-4 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500">🌙 الوضع الليلي</button>
+  </div>
+</footer>
 
-    // إنشاء البطاقات ديناميكيًا
-    const grid = document.querySelector('.grid');
-    const template = document.getElementById('card-template');
-    Object.keys(cases).forEach(name => {
-      const clone = template.content.cloneNode(true);
-      clone.querySelector('.case-title').textContent = name;
-      const card = clone.querySelector('.emergency-card');
-      card.addEventListener('click', () => showCase(name));
-      
-      // إضافة اسم الحالة إلى زر الوقاية
-      const preventionBtn = card.querySelector('.prevention-icon');
-      preventionBtn.setAttribute('onclick', `showPrevention('${name}')`);
-      
-      grid.appendChild(clone);
-    });
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
 
-    // عرض الخطوات
-    let currentStep = 0;
-    let currentSteps = [];
+<script>
+const cases = {
+  "الحروق": {
+    steps: [
+      { emoji: "💧", text: "برد الحرق فورًا بالماء البارد لمدة 10 دقائق." },
+      { emoji: "🩹", text: "غطِّ المنطقة بضمادة نظيفة وغير لاصقة." },
+      { emoji: "🚑", text: "استدعِ الإسعاف إذا كانت الحروق شديدة." }
+    ],
+    prevention: `🔥 لتجنب الحروق:
+- أبقِ الأطفال بعيدين عن أدوات الطهي والمواقد.
+- استخدم واقيات للفرن ولا تترك الزيت يسخن أكثر من اللازم.
+- لا تترك الأجهزة الكهربائية موصلة بالكهرباء دون إشراف.`
+  },
+  "الغرق": {
+    steps: [
+      { emoji: "🚿", text: "أخرج الشخص من الماء وابدأ بالتنفس الاصطناعي إذا لزم." },
+      { emoji: "🛏", text: "ضعه على جانبه لتجنب الاختناق بالقيء." },
+      { emoji: "📞", text: "اتصل بالطوارئ فورًا." }
+    ],
+    prevention: `🌊 لتجنب الغرق:
+- راقب الأطفال دائمًا عند قربهم من الماء، حتى في الحمام.
+- لا تسبح في مناطق عميقة بدون رفيق أو دون معرفة بالسباحة.
+- ارتدِ سترة النجاة عند ركوب القوارب أو التواجد في الأنهار.`
+  },
+  "الصعق الكهربائي": {
+    steps: [
+      { emoji: "🔌", text: "افصل مصدر الكهرباء قبل الاقتراب." },
+      { emoji: "🩹", text: "فحص المصاب وتغطية أي حروق بضمادة." },
+      { emoji: "🚑", text: "استدعِ الإسعاف وتابع العلامات الحيوية." }
+    ],
+    prevention: `⚡ لتجنب الصعق الكهربائي:
+- تجنب لمس الأسلاك العارية أو الأجهزة الرطبة.
+- أبعد الأطفال عن المقابس وضع حواجز أمان.
+- افصل التيار أثناء الصيانة أو في حالات الطوارئ.`
+  },
+  "الإغماء": {
+    steps: [
+      { emoji: "✅", text: "تأكد من أن المكان آمن." },
+      { emoji: "🛏", text: "ارفع الساقين لتحسين الدورة الدموية." },
+      { emoji: "🗣", text: "تحدث مع المصاب وتحقق من وعيه." }
+    ],
+    prevention: `😵 لتجنب الإغماء:
+- تناول وجبات منتظمة وتجنب الوقوف لفترات طويلة.
+- اشرب الماء بكثرة، خاصة في الجو الحار.
+- راجع الطبيب إذا تكررت حالات الدوار أو التعب.`
+  },
+  "انخفاض أو ارتفاع السكر": {
+    steps: [
+      { emoji: "🍬", text: "إذا كان منخفضًا، أعطه سكرًا سريع المفعول." },
+      { emoji: "💧", text: "إذا كان مرتفعًا، وفر له الماء." },
+      { emoji: "📞", text: "اتصل بالطبيب أو الإسعاف إذا استمر الوضع." }
+    ],
+    prevention: `🍭 لتفادي اضطرابات السكر:
+- التزم بتناول الأدوية في مواعيدها.
+- احمل دائمًا معك وجبة خفيفة تحتوي على سكر.
+- راقب مستويات السكر بانتظام وتجنب الإجهاد الشديد.`
+  },
+  "الاختناق": {
+    steps: [
+      { emoji: "🤚", text: "اضغط بقبضة اليد على بطن المصاب (هيمليك)." },
+      { emoji: "🗣", text: "تحقق من خروج الجسم الغريب." },
+      { emoji: "🚑", text: "استدعِ الإسعاف فورًا." }
+    ],
+    prevention: `🫁 لتفادي الاختناق:
+- قَطّع الطعام جيدًا للأطفال وراقبهم أثناء الأكل.
+- تجنب الحديث أو الضحك أثناء المضغ.
+- أبعد الأشياء الصغيرة عن متناول الأطفال.`
+  },
+  "الكسور والجروح": {
+    steps: [
+      { emoji: "🩹", text: "نظف الجرح وغطِّه بضمادة معقمة." },
+      { emoji: "🔗", text: "ثبّت الكسر بجبيرة أو أي شيء صلب." },
+      { emoji: "🚑", text: "استدعِ الإسعاف لنقل المصاب." }
+    ],
+    prevention: `🦴 لتفادي الكسور والجروح:
+- تجنب السير على الأرضيات الزلقة دون حذر.
+- استخدم أدوات الحماية أثناء ممارسة الرياضة.
+- أبعد الأدوات الحادة واحفظها في أماكن آمنة.`
+  },
+  "ضربة الشمس": {
+    steps: [
+      { emoji: "☂", text: "انقل المصاب لمكان بارد ومظلل." },
+      { emoji: "💧", text: "أعطه ماءً ببطء." },
+      { emoji: "🚑", text: "اتصل بالطوارئ إذا ظهرت أعراض خطيرة." }
+    ],
+    prevention: `☀️ لتفادي ضربة الشمس:
+- تجنب التعرض الطويل للشمس، خاصة في وقت الظهيرة.
+- ارتدِ قبعة ونظارات شمسية وشرب الكثير من الماء.
+- خذ فترات راحة متكررة في الظل عند العمل بالخارج.`
+  }
+};
 
-    function showCase(name) {
-      document.getElementById('caseTitle').textContent = name;
-      currentSteps = cases[name];
-      currentStep = 0;
-      renderSteps();
-      document.getElementById('stepsContainer').classList.remove('hidden');
-      // التمرير التلقائي للمكان الذي يحتوي على الخطوات
-      document.getElementById('stepsContainer').scrollIntoView({behavior: "smooth"});
-    }
+// إنشاء البطاقات
+const grid = document.querySelector('.grid');
+const template = document.getElementById('card-template');
+Object.keys(cases).forEach(name => {
+  const clone = template.content.cloneNode(true);
+  clone.querySelector('.case-title').textContent = name;
+  const card = clone.querySelector('.emergency-card');
+  card.addEventListener('click', () => showCase(name));
+  const button = card.querySelector("button");
+  button.setAttribute("onclick", `event.stopPropagation(); showPrevention('${name}')`);
+  grid.appendChild(clone);
+});
 
-    function renderSteps() {
-      const wrapper = document.getElementById('stepsWrapper');
-      wrapper.innerHTML = "";
-      currentSteps.forEach((s, i) => {
-        const div = document.createElement('div');
-        div.className = (i === currentStep ? "" : "hidden ") + "space-y-4";
-        div.innerHTML = `
-          <div class="flex items-start gap-4">
-            <span class="text-4xl">${s.emoji}</span>
-            <p class="text-lg">${s.text}</p>
-          </div>`;
-        wrapper.appendChild(div);
-      });
-      document.getElementById('resetBtn').disabled = (currentStep === 0);
-      document.getElementById('nextBtn').disabled = false;
-      document.getElementById('finishedMsg').classList.add('hidden');
-    }
+// عرض الخطوات
+let currentStep = 0;
+let currentSteps = [];
 
-    function nextStep() {
-      if (currentStep < currentSteps.length - 1) {
-        currentStep++;
-        renderSteps();
-      } else {
-        document.getElementById('finishedMsg').classList.remove('hidden');
-        document.getElementById('nextBtn').disabled = true;
-        document.getElementById('resetBtn').disabled = false;
-      }
-    }
+function showCase(name) {
+  document.getElementById('caseTitle').textContent = name;
+  currentSteps = cases[name].steps;
+  currentStep = 0;
+  renderSteps();
+  document.getElementById('stepsContainer').classList.remove('hidden');
+  document.getElementById('stepsContainer').scrollIntoView({ behavior: "smooth" });
+}
 
-    function resetSteps() {
-      currentStep = 0;
-      renderSteps();
-    }
+function renderSteps() {
+  const wrapper = document.getElementById('stepsWrapper');
+  wrapper.innerHTML = "";
+  currentSteps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = (i === currentStep ? "" : "hidden ") + "space-y-4";
+    div.innerHTML = `
+      <div class="flex items-start gap-4">
+        <span class="text-4xl">${s.emoji}</span>
+        <p class="text-lg">${s.text}</p>
+      </div>`;
+    wrapper.appendChild(div);
+  });
+  document.getElementById('resetBtn').disabled = (currentStep === 0);
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('finishedMsg').classList.add('hidden');
+}
 
-    function closeSteps() {
-      currentStep = 0;
-      document.getElementById('nextBtn').disabled = false;
-      document.getElementById('finishedMsg').classList.add('hidden');
-      renderSteps();
-      document.getElementById('stepsContainer').classList.add('hidden');
-    }
+function nextStep() {
+  if (currentStep < currentSteps.length - 1) {
+    currentStep++;
+    renderSteps();
+  } else {
+    document.getElementById('finishedMsg').classList.remove('hidden');
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('resetBtn').disabled = false;
+  }
+}
 
-    // عرض نصائح الوقاية
-    function showPrevention(name) {
-      const modal = document.getElementById('preventionModal');
-      const title = document.getElementById('preventionTitle');
-      const list = document.getElementById('preventionList');
-      
-      title.textContent = `نصائح للوقاية من ${name}`;
-      list.innerHTML = "";
-      
-      preventionTips[name].forEach(tip => {
-        const li = document.createElement('li');
-        li.textContent = tip;
-        li.className = 'flex items-start';
-        li.innerHTML = `<span class="mr-2 text-green-600">✓</span> ${tip}`;
-        list.appendChild(li);
-      });
-      
-      modal.style.display = 'flex';
-    }
+function resetSteps() {
+  currentStep = 0;
+  renderSteps();
+}
 
-    // إغلاق نافذة الوقاية
-    function closePrevention() {
-      document.getElementById('preventionModal').style.display = 'none';
-    }
+function closeSteps() {
+  currentStep = 0;
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('finishedMsg').classList.add('hidden');
+  renderSteps();
+  document.getElementById('stepsContainer').classList.add('hidden');
+}
 
-    // إغلاق النافذة بالنقر خارج المحتوى
-    window.onclick = function(event) {
-      const modal = document.getElementById('preventionModal');
-      if (event.target === modal) {
-        closePrevention();
-      }
-    }
+// عرض الوقاية
+function showPrevention(name) {
+  const preventionText = cases[name].prevention;
+  document.getElementById("preventionText").textContent = preventionText;
+  document.getElementById("preventionBox").classList.remove("hidden");
+}
 
-    // خريطة جوجل
-    function initMap() {
-      // تم إزالة API key لأسباب أمنية
-      // يمكنك إضافة مفتاح API الخاص بك هنا
-      const center = { lat: 24.7136, lng: 46.6753 };
-      new google.maps.Map(document.getElementById("map"), {
-        zoom: 12,
-        center: center,
-      });
-    }
+// خريطة جوجل
+function initMap() {
+  const center = { lat: 24.7136, lng: 46.6753 };
+  new google.maps.Map(document.getElementById("map"), {
+    zoom: 12,
+    center: center,
+  });
+}
 
-    // الوضع الليلي
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      document.body.style.backgroundColor = document.body.classList.contains('dark')
-        ? '#1a202c'
-        : '#ecfdf5';
-    }
-  </script>
+// الوضع الليلي
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  document.body.style.backgroundColor = document.body.classList.contains('dark')
+    ? '#1a202c'
+    : '#ecfdf5';
+}
+</script>
 </body>
 </html>
