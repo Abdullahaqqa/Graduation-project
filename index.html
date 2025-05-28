@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الإسعافات الأولية - دليل تفاعلي متكامل</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -12,6 +13,73 @@
     }
     .animated { animation: fadeIn 0.5s ease-out; }
     .emergency-card:hover { transform: scale(1.02); }
+    .prevention-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .prevention-content {
+      background: white;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-out;
+    }
+    .prevention-close {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #777;
+      transition: all 0.3s;
+    }
+    .prevention-close:hover {
+      color: #e53e3e;
+      transform: scale(1.1);
+    }
+    .prevention-title {
+      color: #2f855a;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .prevention-list li {
+      margin-bottom: 12px;
+      padding-right: 10px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    .prevention-icon {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 30px;
+      height: 30px;
+      background: #f6e05e;
+      color: #975a16;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .prevention-icon:hover {
+      transform: scale(1.1);
+      background: #ecc94b;
+    }
   </style>
 </head>
 <body class="bg-green-50 text-gray-800">
@@ -33,7 +101,8 @@
     <div class="grid md:grid-cols-3 gap-8">
       <!-- قالب البطاقة -->
       <template id="card-template">
-        <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer">
+        <div class="emergency-card bg-white rounded-xl p-8 shadow-md transition-transform cursor-pointer relative">
+          <span class="prevention-icon absolute top-3 left-3" onclick="showPrevention('{name}')">!</span>
           <h3 class="text-2xl font-semibold text-green-700 mb-4 case-title"></h3>
           <p class="text-gray-600">اضغط لعرض طريقة التعامل</p>
         </div>
@@ -65,9 +134,20 @@
     <!-- خريطة المستشفيات -->
     <div class="mt-12 bg-white rounded-xl p-8 shadow-md" id="hospitalMap">
       <h2 class="text-2xl font-bold mb-4">🏥 أقرب المراكز الطبية</h2>
-      <div id="map" class="h-64 rounded-lg"></div>
+      <div id="map" class="h-64 rounded-lg bg-gray-200 flex items-center justify-center">
+        <p class="text-gray-500">خريطة المستشفيات (تتطلب مفتاح API)</p>
+      </div>
     </div>
   </main>
+
+  <!-- نافذة نصائح الوقاية -->
+  <div class="prevention-modal" id="preventionModal">
+    <div class="prevention-content">
+      <span class="prevention-close" onclick="closePrevention()">✕</span>
+      <h3 class="prevention-title" id="preventionTitle"></h3>
+      <ul class="prevention-list" id="preventionList"></ul>
+    </div>
+  </div>
 
   <!-- تذييل الصفحة -->
   <footer class="bg-green-700 text-white py-6 mt-12">
@@ -80,8 +160,6 @@
     </div>
   </footer>
 
-  <!-- Google Maps API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
   <script>
     // بيانات الحالات وخطواتها
     const cases = {
@@ -127,6 +205,66 @@
       ]
     };
 
+    // نصائح الوقاية لكل حالة
+    const preventionTips = {
+      "الحروق": [
+        "استخدم القفازات عند التعامل مع الأواني الساخنة",
+        "أبعد الأطفال عن المطبخ أثناء الطهي",
+        "افحص درجة حرارة الماء قبل الاستحمام",
+        "ضع واقي شمس عند التعرض للشمس المباشرة",
+        "لا تترك الشموع مشتعلة دون مراقبة"
+      ],
+      "الغرق": [
+        "لا تسبح وحيدًا وخاصة في المساء",
+        "ارتد سترة النجاة عند ركوب القوارب",
+        "علم الأطفال السباحة في سن مبكرة",
+        "ضع سياجًا حول حمامات السباحة في المنازل",
+        "تجنب السباحة بعد الأكل مباشرة"
+      ],
+      "الصعق الكهربائي": [
+        "افصل الأجهزة الكهربائية عند تنظيفها",
+        "لا تلمس الأجهزة الكهربائية بيد مبللة",
+        "استخدم أغطية لمآخذ الكهرباء لحماية الأطفال",
+        "أصلح الأسلاك المتآكلة أو المكشوفة فورًا",
+        "استشر كهربائيًا عند الشك في أي خلل"
+      ],
+      "الإغماء": [
+        "تجنب الوقوف المفاجئ بعد الجلوس الطويل",
+        "اشرب كمية كافية من الماء يوميًا",
+        "تناول وجبات متوازنة بانتظام",
+        "استرح في مكان بارد عند الشعور بالإرهاق",
+        "استشر طبيبًا إذا تكرر الإغماء"
+      ],
+      "انخفاض أو ارتفاع السكر": [
+        "افحص مستوى السكر بانتظام إذا كنت مريض سكر",
+        "احمل معك قطعة سكر أو عصير في جيبك",
+        "تناول وجبات صغيرة متعددة خلال اليوم",
+        "احرص على تناول الأدوية في مواعيدها",
+        "مارس الرياضة بانتظام"
+      ],
+      "الاختناق": [
+        "قطع الطعام لقطع صغيرة خاصة للأطفال",
+        "تجنب الأكل أثناء المشي أو الركض",
+        "لا تضع أشياء صغيرة في متناول الأطفال",
+        "تعلم طريقة هيمليك للإسعافات الأولية",
+        "تحدث مع الأطفال عن مضغ الطعام جيدًا"
+      ],
+      "الكسور والجروح": [
+        "ارتدِ أحذية مناسبة عند ممارسة الرياضة",
+        "استخدم معدات الحماية في أماكن العمل",
+        "أبعد الأدوات الحادة عن متناول الأطفال",
+        "استخدم سلمًا ثابتًا عند الوصول لأماكن مرتفعة",
+        "نظف الأرضيات من السوائل المنسكبة فورًا"
+      ],
+      "ضربة الشمس": [
+        "اشرب الماء بانتظام في الطقس الحار",
+        "ارتدي ملابس قطنية فاتحة اللون",
+        "استخدم واقي شمس وقبعة عند الخروج",
+        "تجنب الخروج في أوقات الذروة (10 ص - 4 م)",
+        "خذ فترات راحة في أماكن مظللة"
+      ]
+    };
+
     // إنشاء البطاقات ديناميكيًا
     const grid = document.querySelector('.grid');
     const template = document.getElementById('card-template');
@@ -135,6 +273,11 @@
       clone.querySelector('.case-title').textContent = name;
       const card = clone.querySelector('.emergency-card');
       card.addEventListener('click', () => showCase(name));
+      
+      // إضافة اسم الحالة إلى زر الوقاية
+      const preventionBtn = card.querySelector('.prevention-icon');
+      preventionBtn.setAttribute('onclick', `showPrevention('${name}')`);
+      
       grid.appendChild(clone);
     });
 
@@ -194,8 +337,43 @@
       document.getElementById('stepsContainer').classList.add('hidden');
     }
 
+    // عرض نصائح الوقاية
+    function showPrevention(name) {
+      const modal = document.getElementById('preventionModal');
+      const title = document.getElementById('preventionTitle');
+      const list = document.getElementById('preventionList');
+      
+      title.textContent = `نصائح للوقاية من ${name}`;
+      list.innerHTML = "";
+      
+      preventionTips[name].forEach(tip => {
+        const li = document.createElement('li');
+        li.textContent = tip;
+        li.className = 'flex items-start';
+        li.innerHTML = `<span class="mr-2 text-green-600">✓</span> ${tip}`;
+        list.appendChild(li);
+      });
+      
+      modal.style.display = 'flex';
+    }
+
+    // إغلاق نافذة الوقاية
+    function closePrevention() {
+      document.getElementById('preventionModal').style.display = 'none';
+    }
+
+    // إغلاق النافذة بالنقر خارج المحتوى
+    window.onclick = function(event) {
+      const modal = document.getElementById('preventionModal');
+      if (event.target === modal) {
+        closePrevention();
+      }
+    }
+
     // خريطة جوجل
     function initMap() {
+      // تم إزالة API key لأسباب أمنية
+      // يمكنك إضافة مفتاح API الخاص بك هنا
       const center = { lat: 24.7136, lng: 46.6753 };
       new google.maps.Map(document.getElementById("map"), {
         zoom: 12,
